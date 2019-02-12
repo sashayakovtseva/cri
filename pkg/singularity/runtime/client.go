@@ -206,6 +206,7 @@ func (c *CLIClient) Kill(id string, force bool) error {
 	if err != nil {
 		if eErr, ok := err.(*exec.ExitError); ok {
 			if strings.Contains(string(eErr.Stderr), "no instance found") {
+				glog.V(8).Infof("Instance %s was killed before", id)
 				return ErrNotFound
 			}
 			return fmt.Errorf("could not kill instance %s: %s", id, eErr.Stderr)
