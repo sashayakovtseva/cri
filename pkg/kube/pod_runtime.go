@@ -122,6 +122,10 @@ func (p *Pod) terminate(force bool) error {
 		glog.V(4).Infof("Terminating pod %s", p.ID())
 	}
 	err := p.cli.Kill(p.id, force)
+	if err == runtime.ErrNotFound {
+		// in case of manual termination
+		return nil
+	}
 	if err != nil {
 		return fmt.Errorf("could not terminate pod: %v", err)
 	}

@@ -90,6 +90,10 @@ func (c *Container) terminate(timeout int64) error {
 
 	// otherwise give container a chance to terminate gracefully
 	err := c.cli.Kill(c.id, false)
+	if err == runtime.ErrNotFound {
+		// in case someone manually killed it
+		return nil
+	}
 	if err != nil {
 		return fmt.Errorf("could not treminate container: %v", err)
 	}
@@ -121,6 +125,10 @@ func (c *Container) kill() error {
 
 	glog.V(4).Infof("Forcibly stopping container %s", c.ID())
 	err := c.cli.Kill(c.id, true)
+	if err == runtime.ErrNotFound {
+		// in case someone manually killed it
+		return nil
+	}
 	if err != nil {
 		return fmt.Errorf("could not kill container: %v", err)
 	}

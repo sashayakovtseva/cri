@@ -201,7 +201,18 @@ func (c *CLIClient) Kill(id string, force bool) error {
 		sig = "SIGKILL"
 	}
 	cmd := append(c.baseCmd, "kill", "-s", sig, id)
-	return run(cmd)
+	killCmd := exec.Command(cmd[0], cmd[1:]...)
+	_, err := killCmd.Output()
+	if err != nil {
+		if eErr, ok := err.(*exec.ExitError); ok {
+			if strings.Contains(string(eErr.Stderr), "no instance found") {
+				return ErrNotFound
+			}
+			return fmt.Errorf("could not kill instance %s: %s", id, eErr.Stderr)
+		}
+		return fmt.Errorf("could not kill instance %s: %s", id, err)
+	}
+	return nil
 }
 
 // Attach asks runtime attach to container standard streams.
